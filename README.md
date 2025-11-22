@@ -10,7 +10,7 @@ Support agents had to manually:
 - Add correct tags / discounts
 - Inform the customer and finance
 
-This was slow, error-prone, and led to inconsistent handling of “re-shipping after failed delivery”.
+This was slow, error-prone, and led to inconsistent handling of “re-shipping after failed return QC”.
 
 ## Solution
 
@@ -21,7 +21,7 @@ A Google Apps Script that:
 - Applies the right **tags** (e.g. `skip_cod_fees`) to instruct downstream finance/ops logic
 - Generates a **payment link** for the customer
 - Handles special case:  
-  - If the order is in “return in progress”, it returns a **FAILED** status and message:  
+  - If the order is in “return in progress”, it returns a **FAILED** status and message to CS Team:  
     > "الطلب لا زال قيد الارجاع، انتظر حتى الغاء الارجاع وحاول مجددا"
 
 ## Tech Stack
@@ -38,9 +38,10 @@ A Google Apps Script that:
 
 ## How It Works (Flow)
 
-1. Support/ops system triggers the webhook / Apps Script entrypoint with:
-   - Original order ID
-   - Customer info (if needed)
+1. Google Sheet triggers the webhook / Apps Script entrypoint with:
+   - Original order number
+   - Customer Email
+   - SKU need to be reshipped 
 2. Script reads order details from Shopify
 3. Script:
    - Creates draft order
@@ -49,7 +50,8 @@ A Google Apps Script that:
    - Adds appropriate tags (e.g. `skip_cod_fees`)
 4. Returns:
    - Payment URL
-   - Status (`SUCCESS` / `FAILED`)
+   - Email sent to same customer with invoice to be paid.
+   - Status (`SUCCESS` / `FAILED`) in Google sheet
    - Error reason if blocked (e.g. return in progress)
 
 ## Configuration
